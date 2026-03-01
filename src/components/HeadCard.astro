@@ -1,0 +1,55 @@
+---
+import Badge from "./ui/Badge.astro";
+import type { Head } from "../types";
+
+interface Props {
+    head?: Head; // Optional because we might use this as a template
+    id?: string;
+    class?: string;
+}
+
+const { head, id, class: className } = Astro.props;
+---
+
+<div
+    id={id}
+    class:list={[
+        "head-card group relative flex flex-col items-center rounded-xl border bg-card p-4 text-card-foreground shadow-sm transition-all hover:shadow-md cursor-pointer",
+        className,
+    ]}
+    data-head={head ? JSON.stringify(head) : undefined}
+>
+    <div
+        class="relative mb-4 aspect-square w-24 overflow-hidden rounded-md bg-muted/50 transition-transform group-hover:scale-105"
+    >
+        {
+            head ? (
+                <img
+                    src={`https://nmsr.nickac.dev/headiso/${head.texture}`}
+                    alt={head.name}
+                    class="h-full w-full object-contain"
+                    loading="lazy"
+                />
+            ) : (
+                <slot name="image" />
+            )
+        }
+    </div>
+
+    <div class="text-center">
+        <h3
+            class="font-semibold leading-none tracking-tight line-clamp-1"
+            title={head?.name}
+        >
+            {head?.name ?? <slot name="name" />}
+        </h3>
+        {
+            head && (
+                <Badge variant="secondary" class="mt-2 text-[10px] uppercase">
+                    {head.category}
+                </Badge>
+            )
+        }
+        {!head && <slot name="badge" />}
+    </div>
+</div>

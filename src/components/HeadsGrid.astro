@@ -1,0 +1,395 @@
+---
+import Input from "./ui/Input.astro";
+import HeadCard from "./HeadCard.astro";
+import Pagination from "./Pagination.astro";
+import HeadModal from "./HeadModal.astro";
+import PlayerGeneratorModal from "./PlayerGeneratorModal.astro";
+import { Search, Loader2, ChevronDown, Plus } from "@lucide/astro";
+import Button from "./ui/Button.astro";
+---
+
+<div class="space-y-6">
+    <!-- Search Bar -->
+    <div
+        class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4"
+    >
+        <div
+            class="relative max-w-4xl mx-auto grid gap-4 grid-cols-1 md:grid-cols-[1fr_auto_auto]"
+        >
+            <div class="relative flex-1">
+                <Search
+                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    id="search-input"
+                    placeholder="Search heads..."
+                    class="pl-10"
+                />
+            </div>
+
+            <div class="relative w-full md:w-[180px]">
+                <select
+                    id="category-select"
+                    class="h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pr-8"
+                >
+                    <option value="">All Categories</option>
+                </select>
+                <ChevronDown
+                    class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none"
+                />
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+                <Button
+                    id="open-generator-btn"
+                    variant="outline"
+                    class="w-full md:w-auto gap-2"
+                >
+                    <Plus class="h-4 w-4" />
+                    Custom Head
+                </Button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="flex justify-center py-20">
+        <Loader2 class="h-8 w-8 animate-spin text-primary" />
+    </div>
+
+    <!-- Result Count -->
+    <div id="results-count" class="text-sm text-muted-foreground hidden"></div>
+
+    <!-- Results Grid -->
+    <div
+        id="heads-grid"
+        class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+        style="display: none;"
+    >
+        <!-- Cards injected here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="no-results" class="hidden text-center py-20 text-muted-foreground">
+        No heads found matching your search.
+    </div>
+
+    <!-- Pagination -->
+    <Pagination id="pagination-controls" class="hidden py-8" />
+
+    <!-- Global Modal -->
+    <HeadModal />
+    <PlayerGeneratorModal />
+</div>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Template for Cards (Client-side cloning) -->
+<template id="head-card-template">
+    <div
+        class="head-card group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-full"
+    >
+        <!-- Image Area - The Protagonist -->
+        <div
+            class="relative aspect-[4/3] w-full overflow-hidden bg-muted/30 flex items-center justify-center p-6 group-hover:bg-muted/50 transition-colors"
+        >
+            <div
+                class="relative w-24 h-24 sm:w-28 sm:h-28 transition-transform duration-300 group-hover:scale-110 drop-shadow-2xl"
+            >
+                <img
+                    src=""
+                    alt=""
+                    class="h-full w-full object-contain filter drop-shadow-lg"
+                    loading="lazy"
+                />
+            </div>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col gap-2 border-t">
+            <div class="flex justify-between items-start gap-2">
+                <h3
+                    class="font-semibold leading-tight tracking-tight line-clamp-2 text-sm text-foreground flex-1"
+                >
+                </h3>
+                <div
+                    class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground uppercase tracking-wider shrink-0"
+                >
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 mt-auto pt-2">
+                <!-- Tags injected here -->
+            </div>
+        </div>
+
+        <!-- Optional: Add a subtle overlay or accent on hover -->
+        <div
+            class="absolute inset-0 rounded-xl ring-1 ring-inset ring-foreground/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+        >
+        </div>
+    </div>
+</template>
+
+<script>
+    import type { Head } from "../types";
+
+    const PAGE_SIZE = 60;
+    let allHeads: Head[] = [];
+    let filteredHeads: Head[] = [];
+    let currentPage = 1;
+
+    // Elements
+    const grid = document.getElementById("heads-grid");
+    const loading = document.getElementById("loading");
+    const noResults = document.getElementById("no-results");
+    const searchInput = document.getElementById(
+        "search-input",
+    ) as HTMLInputElement;
+    const categorySelect = document.getElementById(
+        "category-select",
+    ) as HTMLSelectElement;
+    const template = document.getElementById(
+        "head-card-template",
+    ) as HTMLTemplateElement;
+
+    // Pagination Elements
+    const pagination = document.getElementById("pagination-controls");
+    const pagCurrent = pagination?.querySelector(".pagination-current");
+    const pagTotal = pagination?.querySelector(".pagination-total");
+    const btnFirst = pagination?.querySelector(
+        ".pagination-first",
+    ) as HTMLButtonElement;
+    const btnPrev = pagination?.querySelector(
+        ".pagination-prev",
+    ) as HTMLButtonElement;
+    const btnNext = pagination?.querySelector(
+        ".pagination-next",
+    ) as HTMLButtonElement;
+    const btnLast = pagination?.querySelector(
+        ".pagination-last",
+    ) as HTMLButtonElement;
+
+    async function init() {
+        try {
+            const res = await fetch("/heads.json");
+            allHeads = await res.json();
+            filteredHeads = allHeads;
+
+            // Populate categories
+            const categories = Array.from(
+                new Set(allHeads.map((h) => h.category)),
+            ).sort();
+            categories.forEach((cat) => {
+                const option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                categorySelect.appendChild(option);
+            });
+
+            loading?.classList.add("hidden");
+            grid?.style.removeProperty("display");
+            pagination?.classList.remove("hidden");
+
+            render();
+        } catch (e) {
+            console.error("Failed to load heads", e);
+            if (loading)
+                loading.textContent = "Failed to load data. Please refresh.";
+        }
+    }
+
+    function filterHeads() {
+        const query = searchInput.value.toLowerCase();
+        const category = categorySelect.value;
+
+        filteredHeads = allHeads.filter((h) => {
+            const matchesQuery =
+                h.name.toLowerCase().includes(query) ||
+                h.tags.some((t) => t.toLowerCase().includes(query));
+            const matchesCategory = category === "" || h.category === category;
+            return matchesQuery && matchesCategory;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    function render() {
+        if (!grid) return;
+
+        // Clear grid
+        grid.innerHTML = "";
+
+        if (filteredHeads.length === 0) {
+            noResults?.classList.remove("hidden");
+            pagination?.classList.add("hidden");
+            // Hide count if no results
+            if (pagCurrent && pagTotal) {
+                const countDisplay = document.getElementById("results-count");
+                if (countDisplay) countDisplay.style.display = "none";
+            }
+            return;
+        } else {
+            noResults?.classList.add("hidden");
+            pagination?.classList.remove("hidden");
+        }
+
+        // Slice for pagination
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = Math.min(start + PAGE_SIZE, filteredHeads.length);
+        const pageHeads = filteredHeads.slice(start, start + PAGE_SIZE);
+
+        // Update count display
+        const countDisplay = document.getElementById("results-count");
+        if (!countDisplay) {
+            // Create if doesn't exist (or just assume it exists if I add it to HTML)
+            // But let's add it to HTML in previous step or here via JS?
+            // Safer to assume I'll add HTML for it.
+        } else {
+            countDisplay.style.display = "block";
+            countDisplay.textContent = `Showing ${start + 1}-${end} of ${filteredHeads.length}`;
+        }
+
+        // Render Items
+        const fragment = document.createDocumentFragment();
+
+        pageHeads.forEach((head, index) => {
+            const clone = template.content.cloneNode(true) as DocumentFragment;
+            const card = clone.querySelector(".head-card") as HTMLElement;
+            const img = clone.querySelector("img") as HTMLImageElement;
+            const title = clone.querySelector("h3") as HTMLElement;
+            const badge = clone.querySelector("div.inline-flex") as HTMLElement;
+
+            // Add animation class and style
+            card.style.opacity = "0";
+            card.style.animation = `fadeInUp 0.3s ease-out forwards ${index * 0.03}s`;
+
+            if (img) {
+                img.src = `https://nmsr.nickac.dev/headiso/${head.texture}`;
+                img.alt = head.name;
+            }
+            if (title) {
+                title.textContent = head.name;
+                title.title = head.name;
+            }
+            if (badge) {
+                badge.textContent = head.category;
+            }
+
+            // Tags
+            const tagsContainer = clone.querySelector(".flex-wrap");
+            if (tagsContainer && head.tags) {
+                // Show max 3 tags to keep it clean and fit
+                tagsContainer.innerHTML = head.tags
+                    .slice(0, 3)
+                    .map(
+                        (tag) =>
+                            `<span class="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground bg-muted/50 border-input/50">${tag}</span>`,
+                    )
+                    .join("");
+
+                if (head.tags.length > 3) {
+                    tagsContainer.innerHTML += `<span class="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground bg-muted/50 border-input/50">+${head.tags.length - 3}</span>`;
+                }
+            }
+
+            // Interaction
+            card.addEventListener("click", () => {
+                document.dispatchEvent(
+                    new CustomEvent("open-head-modal", { detail: head }),
+                );
+            });
+
+            fragment.appendChild(clone);
+        });
+
+        grid.appendChild(fragment);
+
+        // Scroll to top of grid
+        if (window.scrollY > 200) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        updatePaginationUI();
+    }
+
+    function updatePaginationUI() {
+        const totalPages = Math.ceil(filteredHeads.length / PAGE_SIZE);
+
+        if (pagCurrent) pagCurrent.textContent = currentPage.toString();
+        if (pagTotal) pagTotal.textContent = totalPages.toString();
+
+        if (btnFirst) btnFirst.disabled = currentPage === 1;
+        if (btnPrev) btnPrev.disabled = currentPage === 1;
+        if (btnNext) btnNext.disabled = currentPage === totalPages;
+        if (btnLast) btnLast.disabled = currentPage === totalPages;
+    }
+
+    // Debounce Utility
+    function debounce<T extends (...args: any[]) => void>(
+        func: T,
+        wait: number,
+    ) {
+        let timeout: NodeJS.Timeout;
+        return (...args: Parameters<T>) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    }
+
+    const debouncedFilterHeads = debounce(filterHeads, 300);
+
+    // Event Listeners
+    searchInput?.addEventListener("input", () => {
+        debouncedFilterHeads();
+    });
+
+    categorySelect?.addEventListener("change", () => {
+        debouncedFilterHeads();
+    });
+
+    // Pagination Listeners
+    btnFirst?.addEventListener("click", () => {
+        currentPage = 1;
+        render();
+    });
+    btnPrev?.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            render();
+        }
+    });
+    btnNext?.addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredHeads.length / PAGE_SIZE);
+        if (currentPage < totalPages) {
+            currentPage++;
+            render();
+        }
+    });
+    btnLast?.addEventListener("click", () => {
+        currentPage = Math.ceil(filteredHeads.length / PAGE_SIZE);
+        render();
+    });
+
+    // Player Generator Modal Logic
+    const openGeneratorBtn = document.getElementById("open-generator-btn");
+
+    openGeneratorBtn?.addEventListener("click", () => {
+        document.dispatchEvent(new CustomEvent("open-player-generator"));
+    });
+
+    // Start
+    init();
+</script>
