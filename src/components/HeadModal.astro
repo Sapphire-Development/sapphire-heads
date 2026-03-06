@@ -3,8 +3,6 @@ import Button from "./ui/Button.astro";
 import Input from "./ui/Input.astro";
 import Badge from "./ui/Badge.astro";
 import { X, Download, Copy, Check } from "@lucide/astro";
-
-// No props needed, it's a global modal controlled by JS
 ---
 
 <dialog
@@ -14,7 +12,6 @@ import { X, Download, Copy, Check } from "@lucide/astro";
     <div
         class="relative grid gap-6 rounded-lg border bg-background p-6 shadow-lg sm:grid-cols-2"
     >
-        <!-- Close Button -->
         <button
             id="close-modal"
             class="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-foreground"
@@ -23,20 +20,38 @@ import { X, Download, Copy, Check } from "@lucide/astro";
             <span class="sr-only">Close</span>
         </button>
 
-        <!-- Left: 3D Render -->
         <div
-            class="flex items-center justify-center rounded-md bg-muted/30 p-8"
+            class="flex items-center justify-center rounded-md bg-muted/30 p-8 overflow-hidden relative group min-h-[250px] sm:min-h-[300px]"
         >
-            <img
-                id="modal-image"
-                src=""
-                alt="Head Render"
-                class="h-48 w-48 object-contain drop-shadow-xl transition-opacity duration-300"
-            />
+            <canvas
+                id="modal-canvas"
+                class="absolute inset-0 w-full h-full object-contain drop-shadow-xl focus:outline-none cursor-grab active:cursor-grabbing"
+            ></canvas>
+            <div
+                class="pointer-events-none absolute bottom-3 left-0 right-0 flex justify-center opacity-50 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-60"
+            >
+                <span
+                    class="flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-sm border"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-mouse"
+                        ><rect x="5" y="2" width="14" height="20" rx="7"
+                        ></rect><path d="M12 6v4"></path></svg
+                    >
+                    Drag to rotate
+                </span>
+            </div>
         </div>
-
-        <!-- Right: Details -->
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col justify-center gap-6">
             <div>
                 <h2
                     id="modal-title"
@@ -52,45 +67,43 @@ import { X, Download, Copy, Check } from "@lucide/astro";
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-2" id="modal-tags">
-                <!-- Tags injected here -->
-            </div>
+            <div class="flex flex-wrap gap-2" id="modal-tags"></div>
 
-            <div class="space-y-2">
-                <label
-                    class="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
-                >
-                    Value
-                </label>
-                <div class="flex items-center gap-2">
-                    <Input
-                        id="base64-input"
-                        readonly
-                        class="font-mono text-xs h-9 text-white"
-                        value=""
-                    />
-                    <Button
-                        id="copy-base64"
-                        variant="outline"
-                        size="icon"
-                        class="h-9 w-9 shrink-0 text-white"
+            <div class="mt-auto grid gap-4 pt-2">
+                <div class="space-y-2">
+                    <label
+                        class="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
                     >
-                        <span
-                            class="copy-icon flex items-center justify-center"
+                        Value
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <Input
+                            id="base64-input"
+                            readonly
+                            class="font-mono text-xs h-9 text-white"
+                            value=""
+                        />
+                        <Button
+                            id="copy-base64"
+                            variant="outline"
+                            size="icon"
+                            class="h-9 w-9 shrink-0 text-white"
                         >
-                            <Copy class="h-4 w-4" />
-                        </span>
-                        <span
-                            class="check-icon flex items-center justify-center hidden"
-                        >
-                            <Check class="h-4 w-4" />
-                        </span>
-                        <span class="sr-only">Copy</span>
-                    </Button>
+                            <span
+                                class="copy-icon flex items-center justify-center"
+                            >
+                                <Copy class="h-4 w-4" />
+                            </span>
+                            <span
+                                class="check-icon flex items-center justify-center hidden"
+                            >
+                                <Check class="h-4 w-4" />
+                            </span>
+                            <span class="sr-only">Copy</span>
+                        </Button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mt-auto grid gap-2">
                 <Button
                     id="download-btn"
                     variant="default"
@@ -105,122 +118,24 @@ import { X, Download, Copy, Check } from "@lucide/astro";
 </dialog>
 
 <script>
-    // Global Modal Logic
+    import { setupModalLogic } from "../utils/modal";
+
     const modal = document.getElementById("head-modal") as HTMLDialogElement;
     const closeBtn = document.getElementById("close-modal");
     const copyBtn = document.getElementById("copy-base64");
     const downloadBtn = document.getElementById("download-btn");
 
     const els = {
-        img: document.getElementById("modal-image") as HTMLImageElement,
+        canvas: document.getElementById("modal-canvas") as HTMLCanvasElement,
         title: document.getElementById("modal-title"),
         category: document.getElementById("modal-category"),
         tags: document.getElementById("modal-tags"),
-
         base64Input: document.getElementById(
             "base64-input",
         ) as HTMLInputElement,
     };
 
-    interface Head {
-        name: string;
-        category: string;
-        tags: string[];
-        texture: string;
-    }
-
-    let currentHead: Head | null = null;
-
-    closeBtn?.addEventListener("click", () => modal.close());
-
-    // Close on backdrop click
-    modal?.addEventListener("click", (e) => {
-        const rect = modal.getBoundingClientRect();
-        const isInDialog =
-            rect.top <= e.clientY &&
-            e.clientY <= rect.top + rect.height &&
-            rect.left <= e.clientX &&
-            e.clientX <= rect.left + rect.width;
-        if (!isInDialog) {
-            modal.close();
-        }
-    });
-
-    // Listen for open event
-    document.addEventListener("open-head-modal", (e: any) => {
-        const head = e.detail;
-        currentHead = head;
-
-        // Reset state to avoid flashing previous content
-        if (els.img) {
-            els.img.src = ""; // Clear source immediately
-            els.img.style.opacity = "0"; // Hide until loaded
-        }
-        if (els.title) els.title.textContent = "Loading...";
-        if (els.category) els.category.textContent = "";
-        if (els.tags) els.tags.innerHTML = "";
-
-        // Update with new data
-        if (els.img) {
-            els.img.src = `https://nmsr.nickac.dev/head/${head.texture}`;
-            els.img.onload = () => {
-                els.img.style.opacity = "1";
-            };
-        }
-        if (els.title) els.title.textContent = head.name;
-        if (els.category) els.category.textContent = head.category;
-
-        // Generate Base64
-        const valueJson = {
-            textures: {
-                SKIN: {
-                    url: `http://textures.minecraft.net/texture/${head.texture}`,
-                },
-            },
-        };
-        const base64 = btoa(JSON.stringify(valueJson));
-        if (els.base64Input) els.base64Input.value = base64;
-
-        // Tags
-        if (els.tags) {
-            els.tags.innerHTML = head.tags
-                .map(
-                    (tag: string) =>
-                        `<div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">${tag}</div>`,
-                )
-                .join("");
-        }
-
-        modal.showModal();
-    });
-
-    // Copy Logic
-    copyBtn?.addEventListener("click", async () => {
-        if (!els.base64Input?.value) return;
-
-        await navigator.clipboard.writeText(els.base64Input.value);
-
-        // Show feedback
-        const copyIcon = copyBtn.querySelector(".copy-icon");
-        const checkIcon = copyBtn.querySelector(".check-icon");
-
-        if (copyIcon && checkIcon) {
-            copyIcon.classList.add("hidden");
-            checkIcon.classList.remove("hidden");
-
-            setTimeout(() => {
-                copyIcon.classList.remove("hidden");
-                checkIcon.classList.add("hidden");
-            }, 2000);
-        }
-    });
-
-    // Download Logic
-    downloadBtn?.addEventListener("click", () => {
-        if (!currentHead) return;
-        const url = `http://textures.minecraft.net/texture/${currentHead.texture}`;
-        window.open(url, "_blank");
-    });
+    setupModalLogic(modal, closeBtn, copyBtn, downloadBtn, els);
 </script>
 
 <style>
