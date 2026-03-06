@@ -1,31 +1,57 @@
 ---
-import "../styles/global.css";
 import Footer from "../components/Footer.astro";
+import "../styles/global.css";
 ---
 
 <!doctype html>
 <html lang="en" class="dark">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/x-icon" href="/sapphirewhite.png" />
-		<link rel="icon" href="/sapphirewhite.png" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Sapphire Heads | Sapphire Development</title>
-	</head>
-	<body>
-		<div class="flex flex-col min-h-screen">
-			<slot />
-			<Footer />
-		</div>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/x-icon" href="/sapphirewhite.png" />
+    <link rel="icon" href="/sapphirewhite.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Sapphire Heads | Sapphire Development</title>
+
+    <meta
+      name="description"
+      content="Browse and discover thousands of Minecraft heads. Search by name, tag, or category to find the perfect decoration for your world."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sapphire Heads | Sapphire Development" />
+    <meta
+      property="og:description"
+      content="Browse and discover thousands of Minecraft heads. Search by name, tag, or category to find the perfect decoration for your world."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://sapphireheads.netlify.app" />
+    <meta property="og:site_name" content="Sapphire Heads" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Sapphire Heads | Sapphire Development"
+    />
+    <meta
+      name="twitter:description"
+      content="Browse and discover thousands of Minecraft heads. Search by name, tag, or category to find the perfect decoration for your world."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+  </head>
+  <body>
+    <div class="flex flex-col min-h-screen">
+      <slot />
+      <Footer />
+    </div>
+  </body>
 </html>
 
 <style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>
