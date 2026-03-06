@@ -4,292 +4,339 @@ import HeadCard from "./HeadCard.astro";
 import Pagination from "./Pagination.astro";
 import HeadModal from "./HeadModal.astro";
 import PlayerGeneratorModal from "./PlayerGeneratorModal.astro";
-import { Search, Loader2, ChevronDown, Plus } from "@lucide/astro";
+import { Search, ChevronDown, Plus } from "@lucide/astro";
 import Button from "./ui/Button.astro";
 ---
 
 <div class="space-y-6">
+  <div
+    class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4"
+  >
     <div
-        class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4"
+      class="relative max-w-4xl mx-auto grid gap-4 grid-cols-1 md:grid-cols-[1fr_auto_auto]"
     >
-        <div
-            class="relative max-w-4xl mx-auto grid gap-4 grid-cols-1 md:grid-cols-[1fr_auto_auto]"
+      <div class="relative flex-1">
+        <Search
+          class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        />
+        <Input id="search-input" placeholder="Search heads..." class="pl-10" />
+      </div>
+
+      <div class="relative w-full md:w-[180px]">
+        <select
+          id="category-select"
+          class="h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pr-8"
         >
-            <div class="relative flex-1">
-                <Search
-                    class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                    id="search-input"
-                    placeholder="Search heads..."
-                    class="pl-10"
-                />
-            </div>
+          <option value="">All Categories</option>
+        </select>
+        <ChevronDown
+          class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none"
+        />
+      </div>
 
-            <div class="relative w-full md:w-[180px]">
-                <select
-                    id="category-select"
-                    class="h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pr-8"
-                >
-                    <option value="">All Categories</option>
-                </select>
-                <ChevronDown
-                    class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none"
-                />
-            </div>
-
-            <div class="flex gap-2 w-full md:w-auto">
-                <Button
-                    id="open-generator-btn"
-                    variant="outline"
-                    class="w-full md:w-auto gap-2"
-                >
-                    <Plus class="h-4 w-4" />
-                    Custom Head
-                </Button>
-            </div>
-        </div>
+      <div class="flex gap-2 w-full md:w-auto">
+        <Button
+          id="open-generator-btn"
+          variant="outline"
+          class="w-full md:w-auto gap-2"
+        >
+          <Plus class="h-4 w-4" />
+          Custom Head
+        </Button>
+      </div>
     </div>
+  </div>
 
-    <div id="loading" class="flex justify-center py-20">
-        <Loader2 class="h-8 w-8 animate-spin text-primary" />
-    </div>
+  <div
+    id="loading"
+    class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+  >
+  </div>
 
-    <div id="results-count" class="text-sm text-muted-foreground hidden"></div>
-    <div
-        id="heads-grid"
-        class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-        style="display: none;"
-    >
-    </div>
+  <div id="results-count" class="text-sm text-muted-foreground hidden"></div>
+  <div
+    id="heads-grid"
+    class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+    style="display: none;"
+  >
+  </div>
 
-    <div id="no-results" class="hidden text-center py-20 text-muted-foreground">
-        No heads found matching your search.
-    </div>
+  <div id="no-results" class="hidden text-center py-20 text-muted-foreground">
+    No heads found matching your search.
+  </div>
 
-    <Pagination id="pagination-controls" class="hidden py-8" />
+  <Pagination id="pagination-controls" class="hidden py-8" />
 
-    <HeadModal />
-    <PlayerGeneratorModal />
+  <HeadModal />
+  <PlayerGeneratorModal />
 </div>
 
 <style>
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <template id="head-card-template">
+  <div
+    class="head-card group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-full"
+  >
     <div
-        class="head-card group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-full"
+      class="relative aspect-[4/3] w-full overflow-hidden bg-muted/30 flex items-center justify-center p-6 group-hover:bg-muted/50 transition-colors"
     >
-        <div
-            class="relative aspect-[4/3] w-full overflow-hidden bg-muted/30 flex items-center justify-center p-6 group-hover:bg-muted/50 transition-colors"
-        >
-            <div
-                class="relative w-24 h-24 sm:w-28 sm:h-28 transition-transform duration-300 group-hover:scale-110 drop-shadow-2xl"
-            >
-                <img
-                    src=""
-                    alt=""
-                    class="h-full w-full object-contain filter drop-shadow-lg"
-                    loading="lazy"
-                />
-            </div>
-        </div>
-
-        <div class="p-4 flex-1 flex flex-col gap-2 border-t">
-            <div class="flex justify-between items-start gap-2">
-                <h3
-                    class="font-semibold leading-tight tracking-tight line-clamp-2 text-sm text-foreground flex-1"
-                >
-                </h3>
-                <div
-                    class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground uppercase tracking-wider shrink-0"
-                >
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-1.5 mt-auto pt-2"></div>
-        </div>
-
-        <div
-            class="absolute inset-0 rounded-xl ring-1 ring-inset ring-foreground/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        >
-        </div>
+      <div
+        class="relative w-24 h-24 sm:w-28 sm:h-28 transition-transform duration-300 group-hover:scale-110 drop-shadow-2xl"
+      >
+        <img
+          src=""
+          alt=""
+          class="h-full w-full object-contain filter drop-shadow-lg"
+          loading="lazy"
+        />
+      </div>
     </div>
+
+    <div class="p-4 flex-1 flex flex-col gap-2 border-t">
+      <div class="flex justify-between items-start gap-2">
+        <h3
+          class="font-semibold leading-tight tracking-tight line-clamp-2 text-sm text-foreground flex-1"
+        >
+        </h3>
+        <div
+          class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground uppercase tracking-wider shrink-0"
+        >
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-1.5 mt-auto pt-2"></div>
+    </div>
+
+    <div
+      class="absolute inset-0 rounded-xl ring-1 ring-inset ring-foreground/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+    >
+    </div>
+  </div>
+</template>
+
+<template id="skeleton-card-template">
+  <div
+    class="head-card-skeleton relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm h-full overflow-hidden"
+  >
+    <div
+      class="relative aspect-[4/3] w-full overflow-hidden bg-muted/30 flex items-center justify-center p-6"
+    >
+      <div
+        class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-muted animate-pulse"
+      >
+      </div>
+    </div>
+    <div class="p-4 flex-1 flex flex-col gap-2 border-t">
+      <div class="flex justify-between items-start gap-2">
+        <div class="flex-1 space-y-2">
+          <div class="h-4 bg-muted rounded animate-pulse w-3/4"></div>
+          <div class="h-4 bg-muted rounded animate-pulse w-1/2"></div>
+        </div>
+        <div class="h-5 w-16 bg-muted rounded-full animate-pulse shrink-0">
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1.5 mt-auto pt-2">
+        <div class="h-4 w-12 bg-muted rounded-full animate-pulse"></div>
+        <div class="h-4 w-16 bg-muted rounded-full animate-pulse"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-    import type { Head } from "../types";
-    import { debounce } from "../utils/debounce";
-    import { renderHeadCard } from "../utils/dom";
-    import { updatePaginationUI } from "../utils/pagination";
-    import { filterHeadsData } from "../utils/filter";
+  import type { Head } from "../types";
+  import { debounce } from "../utils/debounce";
+  import { renderHeadCard } from "../utils/dom";
+  import { filterHeadsData } from "../utils/filter";
+  import { updatePaginationUI } from "../utils/pagination";
 
-    const PAGE_SIZE = 60;
-    let allHeads: Head[] = [];
-    let filteredHeads: Head[] = [];
-    let currentPage = 1;
+  const PAGE_SIZE = 60;
+  let allHeads: Head[] = [];
+  let filteredHeads: Head[] = [];
+  let currentPage = 1;
 
-    const grid = document.getElementById("heads-grid");
-    const loading = document.getElementById("loading");
-    const noResults = document.getElementById("no-results");
-    const searchInput = document.getElementById(
-        "search-input",
-    ) as HTMLInputElement;
-    const categorySelect = document.getElementById(
-        "category-select",
-    ) as HTMLSelectElement;
-    const template = document.getElementById(
-        "head-card-template",
+  const grid = document.getElementById("heads-grid");
+  const loading = document.getElementById("loading");
+  const noResults = document.getElementById("no-results");
+  const searchInput = document.getElementById(
+    "search-input"
+  ) as HTMLInputElement;
+  const categorySelect = document.getElementById(
+    "category-select"
+  ) as HTMLSelectElement;
+  const template = document.getElementById(
+    "head-card-template"
+  ) as HTMLTemplateElement;
+
+  const pagination = document.getElementById("pagination-controls");
+  const pagCurrent = pagination?.querySelector(".pagination-current");
+  const pagTotal = pagination?.querySelector(".pagination-total");
+  const btnFirst = pagination?.querySelector(
+    ".pagination-first"
+  ) as HTMLButtonElement;
+  const btnPrev = pagination?.querySelector(
+    ".pagination-prev"
+  ) as HTMLButtonElement;
+  const btnNext = pagination?.querySelector(
+    ".pagination-next"
+  ) as HTMLButtonElement;
+  const btnLast = pagination?.querySelector(
+    ".pagination-last"
+  ) as HTMLButtonElement;
+
+  function renderSkeletonCards() {
+    const loadingDiv = document.getElementById("loading");
+    const skeletonTemplate = document.getElementById(
+      "skeleton-card-template"
     ) as HTMLTemplateElement;
+    if (!loadingDiv || !skeletonTemplate) return;
 
-    const pagination = document.getElementById("pagination-controls");
-    const pagCurrent = pagination?.querySelector(".pagination-current");
-    const pagTotal = pagination?.querySelector(".pagination-total");
-    const btnFirst = pagination?.querySelector(
-        ".pagination-first",
-    ) as HTMLButtonElement;
-    const btnPrev = pagination?.querySelector(
-        ".pagination-prev",
-    ) as HTMLButtonElement;
-    const btnNext = pagination?.querySelector(
-        ".pagination-next",
-    ) as HTMLButtonElement;
-    const btnLast = pagination?.querySelector(
-        ".pagination-last",
-    ) as HTMLButtonElement;
-
-    async function init() {
-        try {
-            const res = await fetch("/heads.json");
-            allHeads = await res.json();
-            filteredHeads = allHeads;
-
-            const categories = Array.from(
-                new Set(allHeads.map((h) => h.category)),
-            ).sort();
-            categories.forEach((cat) => {
-                const option = document.createElement("option");
-                option.value = cat;
-                option.textContent = cat;
-                categorySelect.appendChild(option);
-            });
-
-            loading?.classList.add("hidden");
-            grid?.style.removeProperty("display");
-            pagination?.classList.remove("hidden");
-
-            render();
-        } catch (e) {
-            console.error("Failed to load heads", e);
-            if (loading)
-                loading.textContent = "Failed to load data. Please refresh.";
-        }
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 12; i++) {
+      const clone = skeletonTemplate.content.cloneNode(
+        true
+      ) as DocumentFragment;
+      const skeletonCard = clone.firstElementChild;
+      if (skeletonCard) {
+        fragment.appendChild(skeletonCard);
+      }
     }
+    loadingDiv.appendChild(fragment);
+  }
 
-    function filterHeads() {
-        const query = searchInput.value;
-        const category = categorySelect.value;
+  async function init() {
+    try {
+      const res = await fetch("/heads.json");
+      allHeads = await res.json();
+      filteredHeads = allHeads;
 
-        filteredHeads = filterHeadsData(allHeads, query, category);
+      const categories = Array.from(
+        new Set(allHeads.map(h => h.category))
+      ).sort();
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+      });
 
-        currentPage = 1;
-        render();
+      loading?.classList.add("hidden");
+      grid?.style.removeProperty("display");
+      pagination?.classList.remove("hidden");
+
+      render();
+    } catch (e) {
+      console.error("Failed to load heads", e);
+      if (loading) loading.textContent = "Failed to load data. Please refresh.";
     }
+  }
 
-    function render() {
-        if (!grid) return;
-        grid.innerHTML = "";
+  function filterHeads() {
+    const query = searchInput.value;
+    const category = categorySelect.value;
 
-        if (filteredHeads.length === 0) {
-            noResults?.classList.remove("hidden");
-            pagination?.classList.add("hidden");
-            if (pagCurrent && pagTotal) {
-                const countDisplay = document.getElementById("results-count");
-                if (countDisplay) countDisplay.style.display = "none";
-            }
-            return;
-        } else {
-            noResults?.classList.add("hidden");
-            pagination?.classList.remove("hidden");
-        }
+    filteredHeads = filterHeadsData(allHeads, query, category);
 
-        const start = (currentPage - 1) * PAGE_SIZE;
-        const end = Math.min(start + PAGE_SIZE, filteredHeads.length);
-        const pageHeads = filteredHeads.slice(start, start + PAGE_SIZE);
+    currentPage = 1;
+    render();
+  }
+
+  function render() {
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    if (filteredHeads.length === 0) {
+      noResults?.classList.remove("hidden");
+      pagination?.classList.add("hidden");
+      if (pagCurrent && pagTotal) {
         const countDisplay = document.getElementById("results-count");
-        if (!countDisplay) {
-        } else {
-            countDisplay.style.display = "block";
-            countDisplay.textContent = `Showing ${start + 1}-${end} of ${filteredHeads.length}`;
-        }
-
-        const fragment = document.createDocumentFragment();
-
-        pageHeads.forEach((head, index) => {
-            const clone = renderHeadCard(template, head, index);
-            fragment.appendChild(clone);
-        });
-
-        grid.appendChild(fragment);
-
-        if (window.scrollY > 200) {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-
-        updatePaginationUI(
-            { currentPage, pageSize: PAGE_SIZE, filteredHeads },
-            { pagCurrent, pagTotal, btnFirst, btnPrev, btnNext, btnLast },
-        );
+        if (countDisplay) countDisplay.style.display = "none";
+      }
+      return;
+    } else {
+      noResults?.classList.add("hidden");
+      pagination?.classList.remove("hidden");
     }
 
-    const debouncedFilterHeads = debounce(filterHeads, 300);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, filteredHeads.length);
+    const pageHeads = filteredHeads.slice(start, start + PAGE_SIZE);
+    const countDisplay = document.getElementById("results-count");
+    if (!countDisplay) {
+    } else {
+      countDisplay.style.display = "block";
+      countDisplay.textContent = `Showing ${start + 1}-${end} of ${filteredHeads.length}`;
+    }
 
-    searchInput?.addEventListener("input", () => {
-        debouncedFilterHeads();
-    });
+    const fragment = document.createDocumentFragment();
 
-    categorySelect?.addEventListener("change", () => {
-        debouncedFilterHeads();
-    });
-
-    btnFirst?.addEventListener("click", () => {
-        currentPage = 1;
-        render();
-    });
-    btnPrev?.addEventListener("click", () => {
-        if (currentPage > 1) {
-            currentPage--;
-            render();
-        }
-    });
-    btnNext?.addEventListener("click", () => {
-        const totalPages = Math.ceil(filteredHeads.length / PAGE_SIZE);
-        if (currentPage < totalPages) {
-            currentPage++;
-            render();
-        }
-    });
-    btnLast?.addEventListener("click", () => {
-        currentPage = Math.ceil(filteredHeads.length / PAGE_SIZE);
-        render();
+    pageHeads.forEach((head, index) => {
+      const clone = renderHeadCard(template, head, index);
+      fragment.appendChild(clone);
     });
 
-    const openGeneratorBtn = document.getElementById("open-generator-btn");
+    grid.appendChild(fragment);
 
-    openGeneratorBtn?.addEventListener("click", () => {
-        document.dispatchEvent(new CustomEvent("open-player-generator"));
-    });
+    if (window.scrollY > 200) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-    // Start
-    init();
+    updatePaginationUI(
+      { currentPage, pageSize: PAGE_SIZE, filteredHeads },
+      { pagCurrent, pagTotal, btnFirst, btnPrev, btnNext, btnLast }
+    );
+  }
+
+  const debouncedFilterHeads = debounce(filterHeads, 300);
+
+  searchInput?.addEventListener("input", () => {
+    debouncedFilterHeads();
+  });
+
+  categorySelect?.addEventListener("change", () => {
+    debouncedFilterHeads();
+  });
+
+  btnFirst?.addEventListener("click", () => {
+    currentPage = 1;
+    render();
+  });
+  btnPrev?.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      render();
+    }
+  });
+  btnNext?.addEventListener("click", () => {
+    const totalPages = Math.ceil(filteredHeads.length / PAGE_SIZE);
+    if (currentPage < totalPages) {
+      currentPage++;
+      render();
+    }
+  });
+  btnLast?.addEventListener("click", () => {
+    currentPage = Math.ceil(filteredHeads.length / PAGE_SIZE);
+    render();
+  });
+
+  const openGeneratorBtn = document.getElementById("open-generator-btn");
+
+  openGeneratorBtn?.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("open-player-generator"));
+  });
+
+  // Start
+  renderSkeletonCards();
+  init();
 </script>
