@@ -1,46 +1,20 @@
-# Astro Starter Kit: Basics
+![Sapphire Heads](./public/og-image.png)
 
-```sh
-npm create astro@latest -- --template basics
-```
+# Sapphire Heads
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Browse and discover thousands of Minecraft heads. Search by name, tag, or category to find the perfect decoration for your world.
 
-## 🚀 Project Structure
+Sapphire Heads is a modern web application that provides an extensive collection of Minecraft player heads. Whether you're building, decorating, or looking for inspiration, find the perfect head for your project with our intuitive search and filtering system.
 
-Inside of your Astro project, you'll see the following folders and files:
+## 🚀 Features
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+- Browse thousands of Minecraft heads
+- Search by name, tag, or category
+- View 3D previews of player heads
+- Copy head commands with one click
+- Responsive design for all devices
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
 
-## 🧞 Commands
+## 💬 Discord
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Join our Discord community: [https://discord.gg/T5xmsU8y3S](https://discord.gg/T5xmsU8y3S)
