@@ -6,169 +6,255 @@ import { X, Download, Copy, Check } from "@lucide/astro";
 ---
 
 <dialog
-    id="head-modal"
-    class="backdrop:backdrop-blur-sm bg-transparent p-0 m-auto max-w-2xl w-full open:animate-in open:fade-in-0 open:zoom-in-95 closed:animate-out closed:fade-out-0 closed:zoom-out-95"
+  id="head-modal"
+  class="backdrop:backdrop-blur-sm bg-transparent p-0 m-auto max-w-2xl w-full open:animate-in open:fade-in-0 open:zoom-in-95 closed:animate-out closed:fade-out-0 closed:zoom-out-95"
 >
-    <div
-        class="relative grid gap-6 rounded-lg border bg-background p-6 shadow-lg sm:grid-cols-2"
+  <div
+    class="relative grid gap-6 rounded-lg border bg-background p-6 shadow-lg sm:grid-cols-2"
+  >
+    <button
+      id="close-modal"
+      class="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-foreground"
     >
-        <button
-            id="close-modal"
-            class="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-foreground"
+      <X class="h-4 w-4" />
+      <span class="sr-only">Close</span>
+    </button>
+
+    <div
+      class="flex self-start items-center justify-center rounded-md bg-muted/30 p-8 overflow-hidden relative group min-h-[250px] sm:min-h-[300px]"
+    >
+      <canvas
+        id="modal-canvas"
+        class="absolute inset-0 w-full h-full object-contain drop-shadow-xl focus:outline-none cursor-grab active:cursor-grabbing"
+      ></canvas>
+      <div
+        class="pointer-events-none absolute bottom-3 left-0 right-0 flex justify-center opacity-50 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-60"
+      >
+        <span
+          class="flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-sm border"
         >
-            <X class="h-4 w-4" />
-            <span class="sr-only">Close</span>
-        </button>
-
-        <div
-            class="flex items-center justify-center rounded-md bg-muted/30 p-8 overflow-hidden relative group min-h-[250px] sm:min-h-[300px]"
-        >
-            <canvas
-                id="modal-canvas"
-                class="absolute inset-0 w-full h-full object-contain drop-shadow-xl focus:outline-none cursor-grab active:cursor-grabbing"
-            ></canvas>
-            <div
-                class="pointer-events-none absolute bottom-3 left-0 right-0 flex justify-center opacity-50 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-60"
-            >
-                <span
-                    class="flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-sm border"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="lucide lucide-mouse"
-                        ><rect x="5" y="2" width="14" height="20" rx="7"
-                        ></rect><path d="M12 6v4"></path></svg
-                    >
-                    Drag to rotate
-                </span>
-            </div>
-        </div>
-        <div class="flex flex-col justify-center gap-6">
-            <div>
-                <h2
-                    id="modal-title"
-                    class="text-2xl font-bold tracking-tight text-foreground"
-                >
-                    Head Name
-                </h2>
-                <div
-                    id="modal-category"
-                    class="mt-1 text-sm text-muted-foreground"
-                >
-                    Category
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2" id="modal-tags"></div>
-
-            <div class="mt-auto grid gap-4 pt-2">
-                <div class="space-y-2">
-                    <label
-                        class="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
-                    >
-                        Value
-                    </label>
-                    <div class="flex items-center gap-2">
-                        <Input
-                            id="base64-input"
-                            readonly
-                            class="font-mono text-xs h-9 text-white"
-                            value=""
-                        />
-                        <Button
-                            id="copy-base64"
-                            variant="outline"
-                            size="icon"
-                            class="h-9 w-9 shrink-0 text-white"
-                        >
-                            <span
-                                class="copy-icon flex items-center justify-center"
-                            >
-                                <Copy class="h-4 w-4" />
-                            </span>
-                            <span
-                                class="check-icon flex items-center justify-center hidden"
-                            >
-                                <Check class="h-4 w-4" />
-                            </span>
-                            <span class="sr-only">Copy</span>
-                        </Button>
-                    </div>
-                </div>
-
-                <Button
-                    id="download-btn"
-                    variant="default"
-                    class="w-full gap-2"
-                >
-                    <Download class="h-4 w-4" />
-                    Download Texture
-                </Button>
-            </div>
-        </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-mouse"
+            ><rect x="5" y="2" width="14" height="20" rx="7"></rect><path
+              d="M12 6v4"></path></svg
+          >
+          Drag to rotate
+        </span>
+      </div>
     </div>
+    <div class="flex flex-col justify-center gap-6">
+      <div>
+        <h2
+          id="modal-title"
+          class="text-2xl font-bold tracking-tight text-foreground"
+        >
+          Head Name
+        </h2>
+        <div id="modal-category" class="mt-1 text-sm text-muted-foreground">
+          Category
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2" id="modal-tags"></div>
+
+      <div class="mt-auto grid gap-4 pt-2">
+        <div class="space-y-2">
+          <label
+            class="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
+          >
+            Value
+          </label>
+          <div class="flex items-center gap-2">
+            <Input
+              id="base64-input"
+              readonly
+              class="font-mono text-xs h-9 text-white"
+              value=""
+            />
+            <Button
+              id="copy-base64"
+              variant="outline"
+              size="icon"
+              class="h-9 w-9 shrink-0 text-white"
+            >
+              <span class="copy-icon flex items-center justify-center">
+                <Copy class="h-4 w-4" />
+              </span>
+              <span class="check-icon flex items-center justify-center hidden">
+                <Check class="h-4 w-4" />
+              </span>
+              <span class="sr-only">Copy</span>
+            </Button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <label
+            class="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground"
+          >
+            Give Command
+          </label>
+          <div class="flex flex-col gap-2">
+            <select
+              id="version-select"
+              class="h-9 w-full px-2 bg-input dark:bg-input/30 border rounded-md text-foreground"
+            ></select>
+            <div class="flex items-center gap-2">
+              <Input
+                id="give-command-input"
+                readonly
+                class="font-mono text-xs h-9 text-white"
+                value=""
+              />
+              <Button
+                id="copy-give-command"
+                variant="outline"
+                size="icon"
+                class="h-9 w-9 shrink-0 text-white"
+              >
+                <span class="copy-icon flex items-center justify-center">
+                  <Copy class="h-4 w-4" />
+                </span>
+                <span
+                  class="check-icon flex items-center justify-center hidden"
+                >
+                  <Check class="h-4 w-4" />
+                </span>
+                <span class="sr-only">Copy</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Button id="download-btn" variant="default" class="w-full gap-2">
+          <Download class="h-4 w-4" />
+          Download Texture
+        </Button>
+      </div>
+    </div>
+  </div>
 </dialog>
 
 <script>
-    import { setupModalLogic } from "../utils/modal";
+  import { getGroupedVersionOptions } from "../utils/minecraft-give";
+  import { setupModalLogic } from "../utils/modal";
 
-    const modal = document.getElementById("head-modal") as HTMLDialogElement;
-    const closeBtn = document.getElementById("close-modal");
-    const copyBtn = document.getElementById("copy-base64");
-    const downloadBtn = document.getElementById("download-btn");
+  const modal = document.getElementById("head-modal") as HTMLDialogElement;
+  const closeBtn = document.getElementById("close-modal");
+  const copyBtn = document.getElementById("copy-base64");
+  const copyGiveCommandBtn = document.getElementById("copy-give-command");
+  const downloadBtn = document.getElementById("download-btn");
+  const versionSelect = document.getElementById(
+    "version-select"
+  ) as HTMLSelectElement;
+
+  const giveCommandInput = document.getElementById(
+    "give-command-input"
+  ) as HTMLInputElement | null;
+
+  if (!modal || !versionSelect || !giveCommandInput) {
+    console.error("Required elements not found:", {
+      modal: !!modal,
+      versionSelect: !!versionSelect,
+      giveCommandInput: !!giveCommandInput
+    });
+  } else {
+    const groups = getGroupedVersionOptions();
+
+    groups.forEach(group => {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+      optgroup.classList.add("bg-background");
+      optgroup.classList.add("text-foreground");
+
+      group.options.forEach(option => {
+        const optionElement = document.createElement("option");
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        optionElement.classList.add("bg-background");
+        optionElement.classList.add("text-foreground");
+        if (option.value === "0") {
+          optionElement.selected = true;
+        }
+        optgroup.appendChild(optionElement);
+      });
+
+      versionSelect.appendChild(optgroup);
+    });
+
+    if (versionSelect.value === "" && versionSelect.options.length > 0) {
+      const firstOption = versionSelect.querySelector(
+        'option[value="0"]'
+      ) as HTMLOptionElement;
+      if (firstOption) {
+        firstOption.selected = true;
+        versionSelect.value = "0";
+      } else if (versionSelect.options[0]) {
+        versionSelect.options[0].selected = true;
+        versionSelect.value = versionSelect.options[0].value;
+      }
+    }
 
     const els = {
-        canvas: document.getElementById("modal-canvas") as HTMLCanvasElement,
-        title: document.getElementById("modal-title"),
-        category: document.getElementById("modal-category"),
-        tags: document.getElementById("modal-tags"),
-        base64Input: document.getElementById(
-            "base64-input",
-        ) as HTMLInputElement,
+      canvas: document.getElementById("modal-canvas") as HTMLCanvasElement,
+      title: document.getElementById("modal-title"),
+      category: document.getElementById("modal-category"),
+      tags: document.getElementById("modal-tags"),
+      base64Input: document.getElementById("base64-input") as HTMLInputElement,
+      giveCommandInput: giveCommandInput,
+      versionSelect: versionSelect
     };
 
-    setupModalLogic(modal, closeBtn, copyBtn, downloadBtn, els);
+    setupModalLogic(
+      modal,
+      closeBtn,
+      copyBtn,
+      downloadBtn,
+      copyGiveCommandBtn,
+      els
+    );
+  }
 </script>
 
 <style>
-    dialog {
-        transition:
-            opacity 0.3s ease-out,
-            transform 0.3s ease-out;
-        opacity: 0;
-        transform: scale(0.95);
-    }
+  dialog {
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
+    opacity: 0;
+    transform: scale(0.95);
+  }
 
-    dialog[open] {
-        opacity: 1;
-        transform: scale(1);
-        @starting-style {
-            opacity: 0;
-            transform: scale(0.95);
-        }
+  dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.95);
     }
+  }
 
-    dialog::backdrop {
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        transition:
-            opacity 0.3s ease-out,
-            backdrop-filter 0.3s ease-out;
-        opacity: 0;
-    }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    transition:
+      opacity 0.3s ease-out,
+      backdrop-filter 0.3s ease-out;
+    opacity: 0;
+  }
 
-    dialog[open]::backdrop {
-        opacity: 1;
-        @starting-style {
-            opacity: 0;
-        }
+  dialog[open]::backdrop {
+    opacity: 1;
+    @starting-style {
+      opacity: 0;
     }
+  }
 </style>
