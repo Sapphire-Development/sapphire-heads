@@ -1,7 +1,7 @@
-import { getTextureUrl } from "./image";
+import { IdleAnimation, SkinViewer } from "skinview3d";
 import { getHeadBase64 } from "./base64";
+import { getTextureUrl } from "./image";
 import { getMinecraftGiveCommand } from "./minecraft-give";
-import { SkinViewer, IdleAnimation } from "skinview3d";
 
 export interface Head {
   name: string;
@@ -108,6 +108,12 @@ export function setupModalLogic(
   });
 
   closeBtn?.addEventListener("click", () => modal.close());
+  
+  modal.addEventListener("close", () => {
+    if (viewer) {
+      viewer.playerObject.visible = false;
+    }
+  });
 
   setupBackdropClose(modal);
 
@@ -147,7 +153,10 @@ export function setupModalLogic(
 
         viewer.animation = new IdleAnimation();
       } else {
-        viewer.loadSkin(getTextureUrl(head.texture));
+        viewer.playerObject.visible = false;
+        viewer.loadSkin(getTextureUrl(head.texture)).then(() => {
+          if (viewer) viewer.playerObject.visible = true;
+        });
 
         viewer.camera.position.set(-15, 20, 20);
         viewer.camera.lookAt(0, 10, 0);
