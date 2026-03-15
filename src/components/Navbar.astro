@@ -1,0 +1,38 @@
+---
+import Button from "../components/ui/Button.astro";
+---
+
+<nav
+    class="top-0 z-50 w-full border-b border-white/10 bg-background/70 backdrop-blur-lg"
+>
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <a href="/" class="flex items-center gap-3 group">
+            <img
+                src="/sapphirewhite.png"
+                alt="Sapphire Heads Logo"
+                class="h-10 w-10 object-contain transition-opacity group-hover:opacity-80"
+            />
+            <span class="text-lg font-semibold tracking-tight">
+                Sapphire Development
+            </span>
+        </a>
+
+        <div class="flex items-center gap-6 text-sm font-medium">
+            <a
+                href="https://heads.sapphi.dev/"
+                class="text-muted-foreground hover:text-foreground transition-colors"
+            >
+                Heads
+            </a>
+
+            <a
+                href="https://skin.sapphi.dev/"
+                class="text-muted-foreground hover:text-foreground transition-colors"
+            >
+                Skin Inspector
+            </a>
+            <Button size="sm" href="https://discord.sapphi.dev/">Discord</Button
+            >
+        </div>
+    </div>
+</nav>
